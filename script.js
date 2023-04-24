@@ -1,9 +1,34 @@
 const container = document.querySelector("#container");
 const gridWidthAndHeight = 800;
+let inkColor = "rainbow";   // can be either "black" or "rainbow"
 let gridItems;
 
+function getRandomColor() {
+    const letters = "0123456789abcdef";
+    let newColor = "#";
+
+    for (let i=0; i<6; i++) {
+        newColor += letters[Math.floor(Math.random() * 16)];
+    }
+
+    return newColor;
+}
+
 function changeBackgroundColor() {
-    this.style.backgroundColor = "black";
+    switch (inkColor) {
+        case "rainbow":
+            // Only decrease brightness if gridItem is inked
+            if (this.style.backgroundColor) {
+                const regexBrightness = /brightness\((.+)\)/;
+                const currentBrightness = Number(regexBrightness.exec(this.style.filter)[1]);
+                this.style.filter = `brightness(${Math.max(currentBrightness-0.1, 0)})`;
+            }
+            this.style.backgroundColor = getRandomColor();
+            break;
+        case "black":
+        default:
+        this.style.backgroundColor = "black";
+    }
 }
 
 function clearGrid() {
@@ -21,6 +46,7 @@ function createGrid(gridSize = 16) {
             const gridItemWidthAndHeight = gridWidthAndHeight/gridSize;
             divColumn.style.width = `${gridItemWidthAndHeight}px`;
             divColumn.style.height = `${gridItemWidthAndHeight}px`;
+            divColumn.style.filter = "brightness(1)";
             divRow.appendChild(divColumn);
         }
         divRow.style.display = "flex";
@@ -29,13 +55,24 @@ function createGrid(gridSize = 16) {
     gridItems = document.querySelectorAll(".grid-item");
 
     gridItems.forEach((gridItem) => {
-        gridItem.addEventListener("mouseover", changeBackgroundColor)
+            gridItem.addEventListener("mouseover", changeBackgroundColor);
     });
 };
+
+function changeInkColor() {
+    console.log('.');
+    if (inkColor === "black") {
+        inkColor = "rainbow";
+    } else {
+        inkColor = "black";
+    }
+    container.style.filter = "brightness(1)";
+}
 
 createGrid();
 
 const btnResizeGrid = document.querySelector("#btn-resize-grid");
-btnResizeGrid.addEventListener("click", (e) => {
-    createGrid(Math.min(prompt("Enter new grid size:", 16), 100));
-});
+const btnChangeColor = document.querySelector("#btn-change-color");
+
+btnResizeGrid.onclick = () => createGrid(Math.min(prompt("Enter new grid size:", 16), 100));
+btnChangeColor.onclick = () => changeInkColor();
