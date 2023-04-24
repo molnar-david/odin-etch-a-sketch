@@ -1,7 +1,7 @@
 const container = document.querySelector("#container");
 const gridWidthAndHeight = 800;
 let isMouseDown = false;
-let inkColor = "rainbow";   // can be either "black" or "rainbow"
+let inkColor = "black";   // can be either "black" or "rainbow"
 
 function getRandomColor() {
     const letters = "0123456789abcdef";
