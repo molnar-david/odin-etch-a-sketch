@@ -1,7 +1,7 @@
 const container = document.querySelector("#container");
 const gridWidthAndHeight = 800;
+let isMouseDown = false;
 let inkColor = "rainbow";   // can be either "black" or "rainbow"
-let gridItems;
 
 function getRandomColor() {
     const letters = "0123456789abcdef";
@@ -14,20 +14,22 @@ function getRandomColor() {
     return newColor;
 }
 
-function changeBackgroundColor() {
-    switch (inkColor) {
-        case "rainbow":
-            // Only decrease brightness if gridItem is inked
-            if (this.style.backgroundColor) {
-                const regexBrightness = /brightness\((.+)\)/;
-                const currentBrightness = Number(regexBrightness.exec(this.style.filter)[1]);
-                this.style.filter = `brightness(${Math.max(currentBrightness-0.1, 0)})`;
-            }
-            this.style.backgroundColor = getRandomColor();
-            break;
-        case "black":
-        default:
-        this.style.backgroundColor = "black";
+function changeBackgroundColor(event) {
+    if (isMouseDown || event.type === "click") {
+        switch (inkColor) {
+            case "rainbow":
+                // Only decrease brightness if gridItem is inked
+                if (this.style.backgroundColor) {
+                    const regexBrightness = /brightness\((.+)\)/;
+                    const currentBrightness = Number(regexBrightness.exec(this.style.filter)[1]);
+                    this.style.filter = `brightness(${Math.max(currentBrightness-0.1, 0)})`;
+                }
+                this.style.backgroundColor = getRandomColor();
+                break;
+            case "black":
+            default:
+            this.style.backgroundColor = "black";
+        }
     }
 }
 
@@ -52,10 +54,12 @@ function createGrid(gridSize = 16) {
         divRow.style.display = "flex";
         container.appendChild(divRow);
     }
-    gridItems = document.querySelectorAll(".grid-item");
+    let gridItems = document.querySelectorAll(".grid-item");
 
     gridItems.forEach((gridItem) => {
+            gridItem.addEventListener("click", changeBackgroundColor);
             gridItem.addEventListener("mouseover", changeBackgroundColor);
+            gridItem.style.draggable = "false";
     });
 };
 
@@ -73,6 +77,11 @@ createGrid();
 
 const btnResizeGrid = document.querySelector("#btn-resize-grid");
 const btnChangeColor = document.querySelector("#btn-change-color");
+document.body.addEventListener("mousedown", () => isMouseDown = true);
+document.body.addEventListener("mouseup", () => isMouseDown = false);
+container.addEventListener("mousedown", (event) => {
+    event.preventDefault();     // Prevent dragging
+});
 
 btnResizeGrid.onclick = () => createGrid(Math.min(prompt("Enter new grid size:", 16), 100));
 btnChangeColor.onclick = () => changeInkColor();
